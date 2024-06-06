@@ -48,6 +48,11 @@
 #include "nn/neuralnetwork.h"
 #endif
 
+
+#ifdef _CUDA
+#include "cuda_runtime.h"
+#endif
+
 // *********for MPI communication*********
 // the following defines the communication used for partition process
 // note that only SYN_COMM communication is used for merging process
@@ -1327,10 +1332,10 @@ void runModelFinder(Params &params, IQTree &iqtree, ModelCheckpoint &model_info,
     // Model already specifed, nothing to do here
     if (!empty_model_found && params.model_name.substr(0, 4) != "TEST" && params.model_name.substr(0, 2) != "MF")
         return;
-    
+
     // update the flag: ModelFinder is run
     params.dating_mf = true;
-    
+
     // if (MPIHelper::getInstance().getNumProcesses() > 1)
     //    outError("Please use only 1 MPI process! We are currently working on the MPI parallelization of model selection.");
     // TODO: check if necessary
@@ -1338,6 +1343,15 @@ void runModelFinder(Params &params, IQTree &iqtree, ModelCheckpoint &model_info,
     //            ((PhyloSuperTree*) &iqtree)->mapTrees();
     double cpu_time = getCPUTime();
     double real_time = getRealTime();
+
+#ifdef _CUDA
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
+    cudaEventRecord(start);
+#endif
+
     model_info.setFileName((string)params.out_prefix + ".model.gz");
     model_info.setDumpInterval(params.checkpoint_dump_interval);
 
@@ -1521,6 +1535,17 @@ void runModelFinder(Params &params, IQTree &iqtree, ModelCheckpoint &model_info,
     cout << endl;
     cout << "All model information printed to " << model_info.getFileName() << endl;
     cout << "CPU time for ModelFinder: " << cpu_time << " seconds (" << convert_time(cpu_time) << ")" << endl;
+
+#ifdef _CUDA
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+    float milliseconds = 0;
+    cudaEventElapsedTime(&milliseconds, start, stop);
+    cout << "GPU time for ModelFinder: " << milliseconds/1000 << " seconds" << endl;
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
+#endif
+
     cout << "Wall-clock time for ModelFinder: " << real_time << " seconds (" << convert_time(real_time) << ")" << endl;
 
     //        alignment = iqtree.aln;
@@ -1902,7 +1927,7 @@ string CandidateModel::evaluate(Params &params,
 #pragma omp critical
 #endif
     iqtree->getModelFactory()->restoreCheckpoint();
-    
+
     bool rate_restored = iqtree->getRate()->hasCheckpoint();
 
     // now switch to the output checkpoint
@@ -4547,7 +4572,7 @@ void PartitionFinder::consolidPartitionResults() {
         int i;
         for (i = 0; i < in_tree->size(); i++) {
             PhyloTree *this_tree = in_tree->at(i);
-            
+
             string bestModel_key = this_tree->aln->name + CKP_SEP + "best_model_" + criterion_name;
             string bestModel;
             string bestScore_key = this_tree->aln->name + CKP_SEP + "best_score_" + criterion_name;
@@ -4565,7 +4590,7 @@ void PartitionFinder::consolidPartitionResults() {
             ASSERT(model_info->getString(info_key, info));
             stringstream ss(info);
             ss >> logL >> df >> treeLen;
-            
+
             this_tree->aln->model_name = bestModel;
             lhsum += (lhvec[i] = logL);
             dfsum += (dfvec[i] = df);
@@ -4584,7 +4609,7 @@ void PartitionFinder::consolidPartitionResults() {
     }
     MPI_Bcast(&lhsum, 1, MPI_DOUBLE, PROC_MASTER, MPI_COMM_WORLD);
     MPI_Bcast(&dfsum, 1, MPI_INT, PROC_MASTER, MPI_COMM_WORLD);
-    
+
     // transfer the best tree and relevant RHAS models of each partition from Master to Workers
     Checkpoint mfchkpt;
     if (MPIHelper::getInstance().isMaster()) {
@@ -4909,7 +4934,7 @@ void PartitionFinder::test_PartitionModel() {
                     if (next_pair->second.part2 > opt_pair.part2)
                         next_pair->second.part2--;
                 }
-                
+
 #ifdef _IQTREE_MPI
                 // transfer the tree and relevant RHAS models from model_info to mfchkpt
                 model_info->transferSubCheckpoint(&mfchkpt, opt_pair.set_name + CKP_SEP + "best_tree_" + criterion_name);
@@ -6072,13 +6097,13 @@ void MergeJob::toString(string& str) {
 
     stringstream ss;
     ss.precision(CKP_PRECISION);
-    
+
     // format: id1 id2 treelen1 treelen2 #
     //         geneset1.size() geneset1[0] geneset1[1] ... #
     //         geneset2.size() geneset2[0] geneset2[1] ... #
-    
+
     ss << id1 << " " << id2 << " " << treelen1 << " " << treelen2 << " # ";
-    
+
     ss << geneset1.size() << " ";
     for (itr=geneset1.begin(); itr!=geneset1.end(); itr++)
         ss << (*itr) << " ";
@@ -6150,7 +6175,7 @@ string classKModel(string model_str, int k) {
     if (n == 1) {
         return model_str;
     }
-    
+
     int j = 0;
     size_t pos = 0;
     size_t pos_fr;
@@ -6176,7 +6201,7 @@ bool changeModel(string model_str, string& new_model_str, string new_subst, int 
         new_model_str = new_subst;
         return true;
     }
-    
+
     int j = 0;
     size_t pos = 0;
     string left_part, right_part;
@@ -6236,11 +6261,11 @@ CandidateModel runModelSelection(Params &params, IQTree &iqtree, ModelCheckpoint
     vector<string> ratehet;
     vector<string> freq_names;
     int i,j;
-    
+
     // timing
     cpu_time = getCPUTime();
     real_time = getRealTime();
-    
+
     // handling checkpoint file
     model_info.setFileName((string)params.out_prefix + ".model.gz");
     model_info.setDumpInterval(params.checkpoint_dump_interval);
@@ -6262,22 +6287,22 @@ CandidateModel runModelSelection(Params &params, IQTree &iqtree, ModelCheckpoint
         partition_type = params.partition_type;
         CKP_SAVE2((&model_info), partition_type);
     }
-    
+
     models_block = readModelsDefinition(params);
-    
+
     if (do_init_tree) {
         // compute initial tree
         iqtree.computeInitialTree(params.SSE);
         iqtree.saveCheckpoint();
     }
-    
+
     max_cats = getClassNum(model_str) * params.max_rate_cats;
     if (action != 1) {
         n_class = getClassNum(model_str) + 1;
     } else {
         n_class = getClassNum(model_str);
     }
-    
+
     uint64_t mem_size = iqtree.getMemoryRequiredThreaded(max_cats);
     cout << "NOTE: MixtureFinder " << n_class << "-class models requires " << (mem_size / 1024) / 1024 << " MB RAM!" << endl;
     if (mem_size >= getMemorySize()) {
@@ -6392,7 +6417,7 @@ CandidateModel runModelSelection(Params &params, IQTree &iqtree, ModelCheckpoint
         skip_all_when_drop = false;
     } else {
         params.ratehet_set = best_rate_name;
-        
+
         getModelSubst(iqtree.aln->seq_type, iqtree.aln->isStandardGeneticCode(), params.model_name,
                       params.model_set, params.model_subset, model_names);
 
@@ -6484,7 +6509,7 @@ CandidateModel runModelSelection(Params &params, IQTree &iqtree, ModelCheckpoint
     cout << "All model information printed to " << model_info.getFileName() << endl;
     cout << "CPU time for MixtureFinder " << n_class << "-class models: " << cpu_time << " seconds (" << convert_time(cpu_time) << ")" << endl;
     cout << "Wall-clock time for MixtureFinder " << n_class << "-class models: " << real_time << " seconds (" << convert_time(real_time) << ")" << endl;
-    
+
     return best_model;
 }
 
@@ -6628,16 +6653,16 @@ void optimiseQMixModel(Params &params, IQTree* &iqtree, ModelCheckpoint &model_i
 
     if (params.model_name.substr(0,6) != "MIX+MF")
         return;
-    
+
     bool test_only = (params.model_name == "MIX+MF");
     params.model_name = "";
-    
+
     if (MPIHelper::getInstance().getNumProcesses() > 1)
         outError("Error! The option -m '" + params.model_name + "' does not support MPI parallelization");
-    
+
     if (iqtree->isSuperTree())
         outError("Error! The option -m '" + params.model_name + "' cannot work on data set with partitions");
-    
+
     if (iqtree->aln->seq_type != SEQ_DNA)
         outError("Error! The option -m '" + params.model_name + "' can only work on DNA data set");
 
@@ -6654,7 +6679,7 @@ void optimiseQMixModel(Params &params, IQTree* &iqtree, ModelCheckpoint &model_i
     params.stop_condition = SC_UNSUCCESS_ITERATION;
 
     optimiseQMixModel_method_update(params, iqtree, model_info, model_str);
-    
+
     // restore the original values
     params.gbo_replicates = orig_gbo_replicates;
     params.consensus_type = orig_consensus_type;
