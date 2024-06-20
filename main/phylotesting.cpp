@@ -1574,7 +1574,7 @@ int CandidateModelSet::generate(Params &params, Alignment *aln, bool separate_ra
 
 // if use nn
 // need a new definations for use pure NN, NN + MF,MF
-#if defined(_NN) || defined(_OLD_NN) || defined(_NN_MF)
+#if (defined(_NN) || defined(_OLD_NN)) && defined(_NN_MF)
     Alignment *alignment = (aln->removeAndFillUpGappySites())->replaceAmbiguousChars();
     NeuralNetwork nn(alignment);
     getModelSubstNN(seq_type, nn, model_names);
@@ -1626,8 +1626,8 @@ int CandidateModelSet::generate(Params &params, Alignment *aln, bool separate_ra
     //bool auto_rate = iEquals(ratehet_set, "AUTO");
 // if use nn
 
-#if defined(_NN) || defined(_OLD_NN) || defined(_NN_MF)
-// if use nn, get alpha value and set innitial value to G
+#if (defined(_NN) || defined(_OLD_NN)) && defined(_NN_MF)
+// todo: if use nn, get alpha value and set innitial value to G
     delete alignment;
 
 #endif
@@ -2867,7 +2867,7 @@ void CandidateModelSet::filterRates(int finished_model) {
                 return; // only works if all models done
             best_score = min(best_score, at(model).getScore());
         }
-    
+
     double ok_score = best_score + Params::getInstance().score_diff_thres;
     set<string> ok_rates;
     for (model = 0; model <= finished_model; model++)
@@ -2889,7 +2889,7 @@ void CandidateModelSet::filterSubst(int finished_model) {
     for (model = 0; model <= finished_model; model++)
         if (at(model).rate_name == at(0).rate_name)
             best_score = min(best_score, at(model).getScore());
-    
+
     double ok_score = best_score + Params::getInstance().score_diff_thres;
     set<string> ok_model;
     for (model = 0; model <= finished_model; model++) {
@@ -2923,7 +2923,7 @@ CandidateModel CandidateModelSet::test(Params &params, PhyloTree* in_tree, Model
     bool do_modelomatic = params.modelomatic && in_tree->aln->seq_type == SEQ_CODON;
     if (generate_candidates) {
         if (in_model_name.empty()) {
-#if defined(_NN) || defined(_OLD_NN)
+#if (defined(_NN) || defined(_OLD_NN)) && !defined(_NN_MF)
             if (params.use_nn_model && in_tree->aln->seq_type == SEQ_DNA) {
                 cout << "Using NN" << endl;
                 // todo: to work with multi-threading: pass along the random number streams to the rngs in the stochastic functions
@@ -2944,7 +2944,7 @@ CandidateModel CandidateModelSet::test(Params &params, PhyloTree* in_tree, Model
 #endif
                 // generate all models the normal way
                 generate(params, in_tree->aln, params.model_test_separate_rate, merge_phase);
-#if defined(_NN) || defined(_OLD_NN)
+#if (defined(_NN) || defined(_OLD_NN)) && !defined(_NN_MF)
             }
             if (do_modelomatic) {
                 ASSERT(!params.use_nn_model);
@@ -4906,7 +4906,7 @@ void PartitionFinder::test_PartitionModel() {
 #endif
 
         if (is_pairs_empty) break;
-        
+
         Checkpoint mfchkpt;
         if (MPIHelper::getInstance().isMaster()) {
 
@@ -6139,7 +6139,7 @@ void MergeJob::toString(string& str) {
 }
 
 void MergeJob::loadString(string& str) {
-    
+
     string s0,s1,s2;
     int n1,n2;
     int i,k;
