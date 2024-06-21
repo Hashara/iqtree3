@@ -2541,7 +2541,14 @@ public:
     *  TRUE if multiple random streams are used
     */
     bool multi_rstreams_used;
-    
+
+
+    /** use neural network for model finder */
+    bool use_model_revelator_with_mf;
+
+    /** model revelator confidence threshold */
+    double model_revelator_confidence;
+
     /**
     *  TRUE to execute alisim
     */
@@ -2824,7 +2831,7 @@ public:
      * TRUE to make the processes of outputting->re-inputting a tree consistent
      */
     bool make_consistent;
-    
+
     /**
      * @private
      * TRUE to compute the SPRTA branch supports

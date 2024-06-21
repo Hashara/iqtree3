@@ -1576,10 +1576,16 @@ int CandidateModelSet::generate(Params &params, Alignment *aln, bool separate_ra
 
 // if use nn
 // need a new definations for use pure NN, NN + MF,MF
-#if (defined(_NN) || defined(_OLD_NN)) && defined(_NN_MF)
-    Alignment *alignment = (aln->removeAndFillUpGappySites())->replaceAmbiguousChars();
-    NeuralNetwork nn(alignment);
-    getModelSubstNN(seq_type, nn, model_names);
+#if defined(_NN) || defined(_OLD_NN)
+    if (params.use_model_revelator_with_mf){
+        Alignment *alignment = (aln->removeAndFillUpGappySites())->replaceAmbiguousChars();
+        NeuralNetwork nn(alignment);
+        getModelSubstNN(seq_type, nn, model_names);
+
+        // todo: do alpha inference and get
+        // do alpha inference and then delete the alignment
+        delete alignment;
+    }
 #else
     getModelSubst(seq_type, aln->isStandardGeneticCode(), params.model_name,
                   model_set, params.model_subset, model_names);
@@ -2924,8 +2930,8 @@ CandidateModel CandidateModelSet::test(Params &params, PhyloTree* in_tree, Model
     bool do_modelomatic = params.modelomatic && in_tree->aln->seq_type == SEQ_CODON;
     if (generate_candidates) {
         if (in_model_name.empty()) {
-#if (defined(_NN) || defined(_OLD_NN)) && !defined(_NN_MF)
-            if (params.use_nn_model && in_tree->aln->seq_type == SEQ_DNA) {
+#if (defined(_NN) || defined(_OLD_NN))
+            if (params.use_nn_model && in_tree->aln->seq_type == SEQ_DNA && !params.use_model_revelator_with_mf){
                 cout << "Using NN" << endl;
                 // todo: to work with multi-threading: pass along the random number streams to the rngs in the stochastic functions
                 // determine substitution model using neural network
@@ -2945,7 +2951,7 @@ CandidateModel CandidateModelSet::test(Params &params, PhyloTree* in_tree, Model
 #endif
                 // generate all models the normal way
                 generate(params, in_tree->aln, params.model_test_separate_rate, merge_phase);
-#if (defined(_NN) || defined(_OLD_NN)) && !defined(_NN_MF)
+#if (defined(_NN) || defined(_OLD_NN))
             }
             if (do_modelomatic) {
                 ASSERT(!params.use_nn_model);
