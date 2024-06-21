@@ -1108,7 +1108,7 @@ void getModelSubst(SeqType seq_type, bool standard_code, string model_name,
 }
 
 /**
- * get the list of substitution models
+ * get the list of substitution models using NN
  */
 void getModelSubstNN(SeqType seq_type, NeuralNetwork nn, StrVector &model_names){
 
@@ -1578,7 +1578,6 @@ int CandidateModelSet::generate(Params &params, Alignment *aln, bool separate_ra
     Alignment *alignment = (aln->removeAndFillUpGappySites())->replaceAmbiguousChars();
     NeuralNetwork nn(alignment);
     getModelSubstNN(seq_type, nn, model_names);
-// get posssible models from NNModelFi
 #else
     getModelSubst(seq_type, aln->isStandardGeneticCode(), params.model_name,
                   model_set, params.model_subset, model_names);
