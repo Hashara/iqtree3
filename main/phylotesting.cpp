@@ -1107,6 +1107,7 @@ void getModelSubst(SeqType seq_type, bool standard_code, string model_name,
         outError("The input models cannot contain reversible and non-reversible models");
 }
 
+#if (defined(_NN) || defined(_OLD_NN)) && defined(_NN_MF)
 /**
  * get the list of substitution models using NN
  */
@@ -1117,6 +1118,7 @@ void getModelSubstNN(SeqType seq_type, NeuralNetwork nn, StrVector &model_names)
     }
 
 }
+#endif
 
 void getStateFreqs(SeqType seq_type, char *state_freq_set, StrVector &freq_names) {
     int j;
