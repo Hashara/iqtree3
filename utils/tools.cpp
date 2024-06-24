@@ -1506,6 +1506,10 @@ void parseArg(int argc, char *argv[], Params &params) {
     params.nn_path_model = "resnet_modelfinder.onnx";
     params.nn_path_rates = "lanfear_alpha_lstm.onnx";
 
+    // use model revelator with model finder
+    params.use_model_revelator_with_mf = false;
+    params.model_revelator_confidence = 0.95;
+
     // ------------ Terrace variables ------------
     params.terrace_check = false;
     params.terrace_analysis = false;
@@ -5737,7 +5741,7 @@ void parseArg(int argc, char *argv[], Params &params) {
             if (strcmp(argv[cnt], "--alisim") == 0) {
                 params.alisim_active = true;
                 params.multi_rstreams_used = true;
-                
+
                 cnt++;
                 if (cnt >= argc || argv[cnt][0] == '-')
                 {
@@ -6916,12 +6920,12 @@ int init_multi_rstreams()
     #ifdef _OPENMP
     // get the number of all threads (not just physical)
     const int num_threads = countPhysicalCPUCores();
-    
+
     // initialize a vector of random seeds
     size_t ran_seed_vec_size = 2*num_threads;
     size_t i;
     vector<int64_t> ran_seed_vec(ran_seed_vec_size);
-    
+
     // generate a vector of random seeds
 //    const int MAX_INT32 = 2147483647;
 //    for (i = 0; i < ran_seed_vec_size; ++i)
@@ -6937,23 +6941,23 @@ int init_multi_rstreams()
             std::cout << " " << ran_seed_vec[i];
         std::cout << std::endl;
     }
-        
+
     // initialize the vector of random streams
     rstream_vec.resize(num_threads);
     for (i = 0; i < num_threads; ++i) {
         init_random(ran_seed_vec[i], false, &rstream_vec[i]);
     }
-        
+
     // initialize the continuous Gamma generators
     generator_vec.resize(num_threads);
     for (i = 0; i < num_threads; ++i)
         generator_vec[i].seed(ran_seed_vec[i+num_threads]);
-    
+
     #endif
 #else
     outError("Oops! Only SPRNG is now supported for the parallel version.")
 #endif
-    
+
     return rstream_vec.size();
 }
 
@@ -6962,10 +6966,10 @@ int finish_multi_rstreams()
     // finish the random streams one by one
     for (size_t i = 0; i < rstream_vec.size(); ++i)
         finish_random(rstream_vec[i]);
-    
+
     // clear the vector of random streams
     rstream_vec.clear();
-    
+
     return rstream_vec.size();
 }
 
