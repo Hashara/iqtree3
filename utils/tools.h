@@ -215,6 +215,16 @@ enum MCMC_CLOCK{
     CORRELATED = 3
 };
 
+/**
+ *  Specify 3 modelRevelator options.
+ */
+enum MODEL_REVELATOR_OPTION {
+    MODEL,
+    ALPHA,
+    BOTH
+};
+
+
 struct IndelDistribution {
     INDEL_DIS_TYPE indel_dis_type;
     double param_1 = -1, param_2 = -1;
@@ -2545,6 +2555,9 @@ public:
 
     /** use neural network for model finder */
     bool use_model_revelator_with_mf;
+
+    /** model revelator option */
+    MODEL_REVELATOR_OPTION model_revelator_option;
 
     /** model revelator confidence threshold. default value = 0.95 */
     double model_revelator_confidence;
