@@ -361,14 +361,14 @@ void NeuralNetwork::initializeTimer() {
     if (time_initialized) {
         return;
     }
-    cout << "initialize timer in NN" << endl;
+//    cout << "initialize timer in NN" << endl;
     int num_threads = Params::getInstance().num_threads;
     int num_processes = 1;
 #ifdef _IQTREE_MPI
     num_processes = MPIHelper::getInstance().getNumProcesses();
 #endif
 
-    cout << "num_threads: " << num_threads << " num_processes: " << num_processes << endl;
+//    cout << "num_threads: " << num_threads << " num_processes: " << num_processes << endl;
 
 
 #if defined(_OPENMP) && defined (_IQTREE_MPI)
@@ -390,14 +390,14 @@ void NeuralNetwork::initializeTimer() {
 }
 
 void NeuralNetwork::startTimer() {
-    cout << "start timer" << endl;
+//    cout << "start timer" << endl;
     local_cpu_time = getCPUTime();
     local_wall_time = getRealTime();
 }
 
 
 void NeuralNetwork::stopTimer() {
-    cout << "stop timer" << endl;
+//    cout << "stop timer" << endl;
     local_cpu_time = getCPUTime() - local_cpu_time;
     local_wall_time = getRealTime() - local_wall_time;
 
