@@ -21,6 +21,8 @@ double NeuralNetwork::wall_time = 0.0;
 DoubleVector NeuralNetwork::run_time_array;
 DoubleVector NeuralNetwork::cpu_time_array;
 DoubleVector NeuralNetwork::wall_time_array;
+double NeuralNetwork::cpu_time = 0.0;
+double NeuralNetwork::wall_time = 0.0;
 #elif defined(_IQTREE_MPI)
 DoubleVector NeuralNetwork::cpu_time_array;
 DoubleVector NeuralNetwork::wall_time_array;
@@ -362,9 +364,11 @@ void NeuralNetwork::initializeTimer() {
     }
 //    cout << "initialize timer in NN" << endl;
     int num_threads = Params::getInstance().num_threads;
-    int num_processes = 1;
-#ifdef _IQTREE_MPI
+    int num_processes;
+#if defined(_IQTREE_MPI)
     num_processes = MPIHelper::getInstance().getNumProcesses();
+#else
+    num_processes = 1;
 #endif
 
 //    cout << "num_threads: " << num_threads << " num_processes: " << num_processes << endl;
@@ -378,6 +382,8 @@ void NeuralNetwork::initializeTimer() {
     run_time_array.resize(num_threads, 0.0);
     cpu_time_array.resize(1, 0.0);
     wall_time_array.resize(1, 0.0);
+    cpu_time = 0.0;
+    wall_time = 0.0;
 #elif defined(_IQTREE_MPI)
     cpu_time = 0.0;
     wall_time = 0.0;
@@ -399,11 +405,14 @@ void NeuralNetwork::stopTimer() {
 //    cout << "stop timer" << endl;
     local_cpu_time = getCPUTime() - local_cpu_time;
     local_wall_time = getRealTime() - local_wall_time;
+    int process_id;
 
-    int process_id = 0;
 #ifdef _IQTREE_MPI
-    int process_id = MPIHelper::getInstance().getProcessID();
+    process_id = MPIHelper::getInstance().getProcessID();
+#else
+    process_id = 0;
 #endif
+
     int thread_id = omp_get_thread_num();
 
 #if defined(_OPENMP) && defined (_IQTREE_MPI)
@@ -414,10 +423,12 @@ void NeuralNetwork::stopTimer() {
         wall_time += local_wall_time;
     }
 #elif defined(_OPENMP)
-    run_time_array[thread_id] += local_cpu_time;
+    run_time_array[thread_id] += local_wall_time;
     if (thread_id == 0) {
         cpu_time_array[0] += local_cpu_time;
         wall_time_array[0] += local_wall_time;
+        cpu_time += local_cpu_time;
+        wall_time += local_wall_time;
     }
 #elif defined(_IQTREE_MPI)
     cpu_time += local_cpu_time;

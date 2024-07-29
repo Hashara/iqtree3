@@ -1556,8 +1556,9 @@ void runModelFinder(Params &params, IQTree &iqtree, ModelCheckpoint &model_info,
 
     if (Params::getInstance().use_model_revelator_with_mf) {
         cout << "NN time statics" << endl;
+        int num_processes;
 #ifdef _IQTREE_MPI
-        int num_processes = MPIHelper::getInstance().getNumProcesses();
+        num_processes = MPIHelper::getInstance().getNumProcesses();
         double* nn_cpu_time_array = new double[num_processes];
         double* nn_wall_time_array = new double[num_processes];
 
@@ -1578,13 +1579,14 @@ void runModelFinder(Params &params, IQTree &iqtree, ModelCheckpoint &model_info,
                 cout << "\t" << p << "\t" << (nn_wall_time_array)[p] << "\t" << nn_cpu_time_array[p] << endl;
             }
         }
-
+#else
+        num_processes = 1;
 #endif
 #if defined(_OPENMP)
 
 
         int num_threads = Params::getInstance().num_threads;
-
+#if defined(_IQTREE_MPI)
         if (num_threads > 1 && num_processes > 1) {
             cout << "openmp + mpi time statics" << endl;
 
@@ -1610,13 +1612,20 @@ void runModelFinder(Params &params, IQTree &iqtree, ModelCheckpoint &model_info,
                 }
             }
         }
-        else if (num_threads > 1 && num_processes == 1){
+#endif
+        if (num_threads > 1 && num_processes == 1){
             cout << "openmp time statics and not mpi " << endl;
             cout << endl;
-            cout << "\tproc\tthreads\trun_time" << endl;
-
             int p = 0;
 
+            // outputing the cpu time and wall time for the processer
+            cout << num_processes << " processes are used for NN model selection" << endl;
+            cout << "\tproc\twall_time\tcpu_time" << endl;
+
+            cout << "\t" << num_processes << "\t" << NeuralNetwork::wall_time << "\t" << NeuralNetwork::cpu_time << endl;
+
+            // printing the time for each thread
+            cout << "\tproc\tthreads\trun_time" << endl;
             for (int t=0; t < num_threads; t++){
                 cout << "\t" << p << "\t" << t << "\t"<< NeuralNetwork::run_time_array[t] << endl;
             }
