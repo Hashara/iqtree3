@@ -1352,9 +1352,9 @@ void runModelFinder(Params &params, IQTree &iqtree, ModelCheckpoint &model_info,
     double cpu_time = getCPUTime();
     double real_time = getRealTime();
 
-#ifdef _CUDA
-    NeuralNetwork::gpu_time=  0.0f;
-#endif
+//#ifdef _CUDA
+//    NeuralNetwork::gpu_time=  0.0f;
+//#endif
 
     model_info.setFileName((string)params.out_prefix + ".model.gz");
     model_info.setDumpInterval(params.checkpoint_dump_interval);
@@ -1540,15 +1540,9 @@ void runModelFinder(Params &params, IQTree &iqtree, ModelCheckpoint &model_info,
     cout << "All model information printed to " << model_info.getFileName() << endl;
     cout << "CPU time for ModelFinder: " << cpu_time << " seconds (" << convert_time(cpu_time) << ")" << endl;
 
-#ifdef _CUDA
-    cudaEventRecord(stop);
-    cudaEventSynchronize(stop);
-    float milliseconds = 0;
-    cudaEventElapsedTime(&milliseconds, start, stop);
-    cout << "GPU time for ModelFinder: " << NeuralNetwork::gpu_time/1000 << " seconds (" << convert_time(NeuralNetwork::gpu_time/1000) << ")" << endl;
-    cudaEventDestroy(start);
-    cudaEventDestroy(stop);
-#endif
+//#ifdef _CUDA
+//    cout << "GPU time for ModelFinder: " << NeuralNetwork::gpu_time/1000 << " seconds (" << convert_time(NeuralNetwork::gpu_time/1000) << ")" << endl;
+//#endif
 
     cout << "Wall-clock time for ModelFinder: " << real_time << " seconds (" << convert_time(real_time) << ")" << endl;
 
