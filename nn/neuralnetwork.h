@@ -61,7 +61,7 @@ public:
 
 
 #if defined(_CUDA) && defined(_OPENMP)
-    static DoubleVector gpu_time_array[omp_get_max_threads()];
+    static DoubleVector gpu_time_array;
 #elif defined(_CUDA)
     static float gpu_time;
 #endif
