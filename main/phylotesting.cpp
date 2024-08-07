@@ -1617,6 +1617,7 @@ void runModelFinder(Params &params, IQTree &iqtree, ModelCheckpoint &model_info,
         }
 #endif
     }
+#endif
 
     //        alignment = iqtree.aln;
     if (test_only) {
