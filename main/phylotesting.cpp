@@ -102,6 +102,11 @@ const char *dna_model_names_modelomatic[] = {"JC", "F81", "K80", "HKY", "GTR"};
 const char* dna_freq_names[] = {"FQ", "F"}; // default
 const char* dna_freq_names_full[] = {"FQ", "F", "FO"}; // full
 
+/* DNA model supported by ModelRevelator */
+const char *dna_model_names_modelrevelator[] = {"JC", "F81", "K80", "HKY", "TN","GTR"};
+
+//const char* dna_freq_names[] = {"+FO"};
+
 // Lie-Markov models without an RY, WS or MK prefix
 const char *dna_model_names_lie_markov_fullsym[] =
     {"1.1", "3.3a", "4.4a", "6.7a", "9.20b", "12.12"};
@@ -1115,6 +1120,7 @@ void getModelSubstNN(SeqType seq_type, NeuralNetwork* nn, StrVector &model_names
 
     if (seq_type == SEQ_DNA){
         nn->doModelInference(&model_names);
+        reorderModelNames(model_names, dna_model_names_modelrevelator, sizeof(dna_model_names_modelrevelator) / sizeof(dna_model_names_modelrevelator[0]));
     }
 
 }
