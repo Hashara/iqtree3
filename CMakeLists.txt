@@ -97,7 +97,7 @@ if(Boost_FOUND)
     add_definitions(-DUSE_BOOST)
 endif()
 
-# NOTE: After updating cmake_minimum_required to 3.5, 
+# NOTE: After updating cmake_minimum_required to 3.5,
 # if we call check_function_exists() after set(CMAKE_EXE_LINKER_FLAGS), it returns function not found
 # So, I moved this step upward to avoid the compilation errors due to not-found functions
 ##################################################################
