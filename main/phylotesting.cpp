@@ -1107,7 +1107,7 @@ void getModelSubst(SeqType seq_type, bool standard_code, string model_name,
         outError("The input models cannot contain reversible and non-reversible models");
 }
 
-#if (defined(_NN) || defined(_OLD_NN)) && defined(_NN_MF)
+#if defined(_NN) || defined(_OLD_NN)
 /**
  * get the list of substitution models using NN
  */
