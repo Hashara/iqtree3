@@ -3,7 +3,7 @@ expected_column="$1"
 
 WD="test_scripts/test_data"
 input_file="${WD}/expected_memory.tsv"
-reported_file="test_scripts/time_log.tsv"
+reported_file="time_log.tsv"
 selected_columns_file="${WD}/selected_columns.tsv"
 cut -f1,2,3,"$expected_column" "$input_file" > "${selected_columns_file}"
 final_file="${WD}/combined_with_reported.tsv"
