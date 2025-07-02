@@ -23,7 +23,7 @@ tail -n +2 "$input_file" | while IFS=$'\t' read -r command threshold expected re
     allowed=$(echo "$expected + $threshold" | bc -l)
     # Check if reported > allowed
     is_exceed=$(echo "$reported > $allowed" | bc -l)
-    if [ "$is_exceed" -eq 1 ]; then
+    if [ "$is_exceed" = "1" ]; then
         diff=$(echo "$reported - $expected" | bc -l)
         echo -e "$command\t$expected\t$threshold\t$reported\t$diff"
         ((fail_count++))
