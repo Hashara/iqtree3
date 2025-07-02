@@ -12,16 +12,16 @@ function Measure-IQTree {
 
     $startTime = Get-Date
 
-    # Start the process and get its PID
+    # Start the command in a child PowerShell process
     $proc = Start-Process -FilePath "powershell" -ArgumentList "-NoProfile", "-Command", $CommandLine -PassThru
-    $pid = $proc.Id
+    $procId = $proc.Id
     $peakMemory = 0
 
-    # Monitor memory while the process is running
+    # Monitor the child process's memory usage
     while (-not $proc.HasExited) {
         Start-Sleep -Milliseconds 200
         try {
-            $currentMem = (Get-Process -Id $pid -ErrorAction Stop).WorkingSet64 / 1MB
+            $currentMem = (Get-Process -Id $procId -ErrorAction Stop).WorkingSet64 / 1MB
             if ($currentMem -gt $peakMemory) {
                 $peakMemory = $currentMem
             }
@@ -33,9 +33,10 @@ function Measure-IQTree {
     $endTime = Get-Date
     $elapsed = [math]::Round(($endTime - $startTime).TotalSeconds, 2)
 
-    # Log to file
+    # Write timing and memory data to log
     "$CommandLine`t$elapsed`t$([math]::Round($peakMemory, 2))" | Out-File -FilePath $LOGFILE -Append -Encoding utf8
 }
+
 
 
 # ./build/iqtree3 -s test_scripts/test_data/small.fa -p test_scripts/test_data/small.nex -m "MFP+MERGE" -T 1 -seed $SEED
