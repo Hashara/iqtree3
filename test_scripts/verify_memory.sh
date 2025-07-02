@@ -10,7 +10,7 @@ final_file="${WD}/combined_with_reported.tsv"
 
 # assuming the reported file and expected file have the same order of commands
 cut -f"$expected_column" "$reported_file" > /tmp/reported_column.tsv
-paste "$selected_columns_file" /tmp/reported_column.txt > "$final_file"
+paste "$selected_columns_file" /tmp/reported_column.tsv > "$final_file"
 
 
 fail_count=0
