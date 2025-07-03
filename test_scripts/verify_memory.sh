@@ -18,11 +18,10 @@ fail_count=0
 echo -e "Command\tExpected\tThreshold\tActual\tExceededBy"
 
 # Skip header
-tail -n +2 "$final_file" | while IFS=$'\t' read -r command threshold expected reported; do
-    # Compute allowed = expected + threshold
+while IFS=$'\t' read -r command threshold expected reported; do
     allowed=$(echo "$expected + $threshold" | bc -l)
-    # Check if reported > allowed
     is_exceed=$(echo "$reported > $allowed" | bc -l)
+
     if [ "$is_exceed" = "1" ]; then
         diff=$(echo "$reported - $expected" | bc -l)
         echo "❌ $command exceeded the allowed memory usage."
@@ -30,11 +29,11 @@ tail -n +2 "$final_file" | while IFS=$'\t' read -r command threshold expected re
         ((fail_count++))
     else
         echo "✅ $command passed the memory check."
+        diff=$(echo "$reported - $expected" | bc -l)
         echo -e "$command\t$expected\t$threshold\t$reported\t$diff"
     fi
-done
+done < <(tail -n +2 "$final_file")
 
-echo
 if [ "$fail_count" -eq 0 ]; then
     echo "✅ All runtime checks passed."
 else
