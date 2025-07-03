@@ -15,7 +15,7 @@ turtle_aa.fasta.iqtree	Total CPU time used	12	61.60878	61.761949	100.241028	44.1
 turtle_aa.loci.iqtree	Total CPU time used	12	55.21	56.31	89.16	32.3	45.828247	31.66
 turtle_aa.merge.iqtree	Total CPU time used	12	65.057715	65.34153	106.422985	48.539932	47.526024	36.890625
 turtle_aa.nex.constr.iqtree	Total CPU time used	12	60.3527	60.7689	98.7859	47.122	38.9924	34.4219
-turtle_aa.nex.constr2.iqtree	Total CPU time used	12	82.473306	82.646098	135.013106	54.514873	58.861398	47.40625
+turtle_aa.nex.constr2.iqtree	Total CPU time used	12	82.473306	82.646098	135.013106	85.280632	58.861398	47.40625
 turtle_aa.nex.iqtree	Total CPU time used	12	70.691887	71.079425	115.466386	54.95159	52.16108	40.890625
 turtle_aa.test.iqtree	Total CPU time used	1	1.69	1.81	2.72	0.862	0.979	0.922
 turtle_aa.wpl.iqtree	Total CPU time used	3	1.6987	1.701	2.7838	0.89948	1.0239	0.96875
