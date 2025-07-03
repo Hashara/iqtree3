@@ -1,9 +1,9 @@
 #!/bin/bash
 expected_column="$1"
 
-WD="/Users/u7826985/Projects/gitworkflow/iqtree3/test_scripts/test_data"
+WD="test_scripts/test_data"
 input_file="${WD}/expected_memory.tsv"
-reported_file="/Users/u7826985/Projects/gitworkflow/iqtree3/test_scripts/timelogs/time_log.tsv"
+reported_file="time_log.tsv"
 selected_columns_file="${WD}/selected_columns.tsv"
 cut -f1,2,"$expected_column" "$input_file" > "${selected_columns_file}"
 final_file="${WD}/combined_with_reported.tsv"
