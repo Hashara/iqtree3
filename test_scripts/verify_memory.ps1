@@ -1,5 +1,5 @@
 param (
-    [int]   $ExpectedColumn = 8
+    [int]$ExpectedColumn  # 3 = ExpectedMemory or Runtime
 )
 
 $WD = "test_scripts/test_data"
@@ -38,6 +38,31 @@ $failCount = 0
 $finalLines = Get-Content $finalFile
 
 foreach ($line in $finalLines) {
-$parts = $line -split "`t"
-$command = $parts[0]
-$threshold = [double]$parts[1]
+    $parts = $line -split "`t"
+    $command = $parts[0]
+    $threshold = [double]$parts[1]
+    $expected = [double]$parts[2]
+    $reported = [double]$parts[3]
+
+    $allowed = $expected + $threshold
+    $exceededBy = $reported - $expected
+
+    if ($reported -gt $allowed) {
+        Write-Host "❌ $command exceeded the allowed usage."
+        Write-Host "Expected: $expected MB, Threshold: $threshold MB, Reported: $reported MB"
+        $failCount++
+    } else {
+        Write-Host "✅ $command passed the check."
+        Write-Host "Expected: $expected MB, Threshold: $threshold MB, Reported: $reported MB"
+    }
+}
+
+Write-Host ""
+
+if ($failCount -eq 0) {
+    Write-Host "✅ All runtime/memory checks passed."
+    exit 0
+} else {
+    Write-Host "❌ $failCount checks failed."
+    exit 1
+}
