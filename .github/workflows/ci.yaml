@@ -394,5 +394,4 @@ jobs:
 
       - name: Run verify_memory.sh
         run: |
-          chmod +x test_scripts/verify_memory.ps1
           ./test_scripts/verify_memory.ps1
