@@ -449,10 +449,33 @@ if (MSVC)
 endif()
 
 if (NVHPC)
+
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -noswitcherror")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -cuda") # to disable AVX512 intrinsics
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Minfo=accel")
 endif()
+if (USE_CUDA)
+    message("CUDA : Yes")
+    enable_language(CUDA)
+    add_definitions(-DUSE_CUDA)
+    set(CMAKE_CUDA_STANDARD 14)
+    if (NVHPC)
+        find_package(CUDA REQUIRED)
+        if (CUDA_FOUND)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_CUDA")
+            include_directories(${CUDA_INCLUDE_DIRS})
+            link_directories(${CUDA_LIBRARY_DIRS})
+        else()
+            message(FATAL_ERROR "CUDA not found. Either install it or rerun cmake with -DCUDA_ROOT=<installed_cuda_dir>")
+        endif()
+    else()
+        message(FATAL_ERROR "CUDA requires NVHPC compiler support")
+    endif()
+else ()
+    message("CUDA : No")
+endif()
+
+
 
 # enable link time optimization
 if (IQTREE_FLAGS MATCHES "lto")
